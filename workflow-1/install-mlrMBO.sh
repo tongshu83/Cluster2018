@@ -17,4 +17,4 @@ echo "Press enter to confirm, or Ctrl-C to cancel."
 read _
 
 THIS=$( dirname $0 )
-nice R -f $THIS/install-candle.R
+nice R -f $THIS/install-mlrMBO.R
