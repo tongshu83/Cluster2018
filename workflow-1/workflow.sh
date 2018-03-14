@@ -17,25 +17,24 @@ export TURBINE_LOG=0 TURBINE_DEBUG=0 ADLB_DEBUG=0
 # Find my installation directory
 export EMEWS_PROJECT_ROOT=$( cd $( dirname $0 ) ; /bin/pwd )
 
-export MODEL_SH=$EMEWS_PROJECT_ROOT/model.sh
-export MODEL_NAME="p3b1"
-
 # Set the output directory
 export TURBINE_OUTPUT=$EMEWS_PROJECT_ROOT/experiments/$EXPID
 mkdir -pv $TURBINE_OUTPUT
 
 # Total number of processes available to Swift/T
 # Of these, 2 are reserved for the system
-export PROCS=3
+export PROCS=5
 
 # EMEWS resident task workers and ranks
 export TURBINE_RESIDENT_WORK_WORKERS=1
 export RESIDENT_WORK_RANKS=$(( PROCS - 2 ))
 
+export PYTHONPATH=$HOME/sfw/swift-t/turbine/py
+
 # mlrMBO settings
 PARAM_SET_FILE=$EMEWS_PROJECT_ROOT/data/params.R
 MAX_CONCURRENT_EVALUATIONS=2
-MAX_ITERATIONS=3
+MAX_ITERATIONS=10
 
 # Benchmark settings
 BENCHMARK_TIMEOUT=${BENCHMARK_TIMEOUT:-3600}
@@ -54,7 +53,7 @@ MACHINE=""
 ENVS=""
 
 set -x
-swift-t $MACHINE -p -n $PROCS \
+swift-t -l $MACHINE -p -n $PROCS \
         -I $EQR -r $EQR $ENVS \
         $EMEWS_PROJECT_ROOT/workflow.swift ${CMD_LINE_ARGS[@]}
 

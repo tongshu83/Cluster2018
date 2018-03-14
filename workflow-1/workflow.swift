@@ -11,6 +11,8 @@ import stats;
 import math;
 import location;
 import assert;
+import json;
+
 import R;
 
 import EQR;
@@ -21,7 +23,7 @@ string resident_work_ranks = getenv("RESIDENT_WORK_RANKS");
 string r_ranks[] = split(resident_work_ranks,",");
 int propose_points = toint(argv("pp", "3"));
 int max_budget = toint(argv("mb", "110"));
-int max_iterations = toint(argv("it", "5"));
+int max_iterations = toint(argv("it", "10"));
 int design_size = toint(argv("ds", "10"));
 string param_set = argv("param_set_file");
 string model_name = argv("model_name");
@@ -30,31 +32,40 @@ int benchmark_timeout = toint(argv("benchmark_timeout", "-1"));
 string obj_param = argv("obj_param", "val_loss");
 string site = argv("site");
 
-string FRAMEWORK = "keras";
-
 // Call to objective function: the NN model,
 //  then get results from output file
 (string result) obj(string params, string run_id)
 {
-  string model_sh       = getenv("MODEL_SH");
   string turbine_output = getenv("TURBINE_OUTPUT");
 
   string outdir = "%s/run/%s" % (turbine_output, run_id);
-  // printf("running model shell script in: %s", outdir);
+  printf("running model shell script in: %s", outdir);
   string result_file = outdir/"result.txt";
-  wait (run_model(model_sh, params, run_id))
+
+  ht_procs = json_get(params, "ht_procs");
+  sw_procs = json_get(params, "sw_procs");
+
+  // Something like MPIX_Launch_Swift/apps/multi-1/workflow-1.swift
+  // @par=ht_procs+sw_procs launch_multi([ht_procs, sw_procs],
+  //                       "write.sh write.sh",
+  //                       "heat_transfer stage_write", arguments);
+
+  wait (run_model(ht_procs+" "+sw_procs, run_id))
   {
     result = get_results(result_file);
   }
+
+  // result = "1.0";
+
   printf("result(%s): %s", run_id, result);
 }
 
-// Run the Python code
-app (void o) run_model (string model_sh, string params,
+// Run a shell script
+app (void o) run_model (string params,
                         string run_id)
 {
-  //                  1         2      3
-  "bash" model_sh FRAMEWORK params run_id;
+  //                    1         2
+  "bash" "fake-fob.sh" params run_id;
 }
 
 // Get the results from a NN run
@@ -79,6 +90,7 @@ app (void o) run_model (string model_sh, string params,
        b=c, i = i + 1)
   {
     string params =  EQR_get(ME);
+    printf("params: %s", params);
     boolean c;
 
     if (params == "DONE")
@@ -102,14 +114,14 @@ app (void o) run_model (string model_sh, string params,
     else
     {
       string param_array[] = split(params, ";");
-      string results[];
+      string result[];
       foreach p, j in param_array
       {
-        results[j] = obj(p, "%000i_%0000i" % (i,j));
+        result[j] = obj(p, "%000i_%0000i" % (i,j));
       }
-      string res = join(results, ";");
-      // printf(res);
-      EQR_put(ME, res) => c = true;
+      string results = join(result, ";");
+      printf("results: %s", results);
+      EQR_put(ME, results) => c = true;
     }
   }
 }
