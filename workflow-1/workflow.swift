@@ -62,7 +62,7 @@ string site = argv("site");
     string envs[][];
 
     envs[0] = [ "swift_chdir=/tmp"/run_id ];
-    envs[1] = [ "swift_chdir=/tmp"/run_id ];¬
+    envs[1] = [ "swift_chdir=/tmp"/run_id ];
 
     // Something like MPIX_Launch_Swift/apps/multi-1/workflow-1.swift
     printf("swift: multiple launching: %s, %s", cmds[0], cmds[1]);
