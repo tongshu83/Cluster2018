@@ -23,7 +23,7 @@ mkdir -pv $TURBINE_OUTPUT
 
 # Total number of processes available to Swift/T
 # Of these, 2 are reserved for the system
-export PROCS=5
+export PROCS=21
 
 # EMEWS resident task workers and ranks
 export TURBINE_RESIDENT_WORK_WORKERS=1
@@ -46,15 +46,17 @@ CMD_LINE_ARGS=( -pp=$MAX_CONCURRENT_EVALUATIONS
               )
 
 EQR=$EMEWS_PROJECT_ROOT/EQ-R
+LAUNCH=$HOME/proj/mls/src
+
 # USER: set the R variable to your R installation
 R=$HOME/Public/sfw/R-3.4.3/lib/R
-export LD_LIBRARY_PATH=$R/lib:$R/library/Rcpp/lib:$R/library/RInside/lib
+export LD_LIBRARY_PATH=$R/lib:$R/library/Rcpp/lib:$R/library/RInside/lib:$HOME/sfw/evpath/lib
 MACHINE=""
 ENVS=""
 
 set -x
 swift-t -l $MACHINE -p -n $PROCS \
-        -I $EQR -r $EQR $ENVS \
+        -I $EQR -r $EQR -I $LAUNCH -r $LAUNCH $ENVS \
         $EMEWS_PROJECT_ROOT/workflow.swift ${CMD_LINE_ARGS[@]}
 
 echo WORKFLOW COMPLETE.

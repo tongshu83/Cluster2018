@@ -33,6 +33,14 @@ int benchmark_timeout = toint(argv("benchmark_timeout", "-1"));
 string obj_param = argv("obj_param", "val_loss");
 string site = argv("site");
 
+(void v) setup_run(string dir) "turbine" "0.0"
+[
+"""
+file mkdir <<dir>>
+file copy heat_transfer.xml <<dir>>
+"""
+];
+
 // Call to objective function: the NN model,
 //  then get results from output file
 (string result) obj(string params, string run_id)
@@ -40,33 +48,36 @@ string site = argv("site");
     string turbine_output = getenv("TURBINE_OUTPUT");
 
     string outdir = "%s/run/%s" % (turbine_output, run_id);
-    printf("running model shell script in: %s", outdir);
+    printf("running obj() in: %s", outdir);
     string result_file = outdir/"result.txt";
 
-    ht_procs = json_get(params, "ht_procs");
-    sw_procs = json_get(params, "sw_procs");
-    int procs[] = [string2int(ht_procs), string2int(sw_procs)];
+    ht_procs_x = string2int(json_get(params, "ht_procs_x"));
+    ht_procs_y = string2int(json_get(params, "ht_procs_y"));
+    sw_procs   = string2int(json_get(params, "sw_procs"));
+    int procs[] = [ht_procs_x*ht_procs_y, sw_procs];
 
-    string ht_path = "/home/tshu/project/Example-Heat_Transfer/heat_transfer_adios2";
-    string sw_path = "/home/tshu/project/Example-Heat_Transfer/stage_write/stage_write";
+    // string ht_path = "/home/tshu/project/Example-Heat_Transfer/heat_transfer_adios2";
+    // string sw_path = "/home/tshu/project/Example-Heat_Transfer/stage_write/stage_write";
+
+    string ht_path = "/home/wozniak/proj/Heat_Transfer/heat_transfer_adios2";
+    string sw_path = "/home/wozniak/proj/Heat_Transfer/stage_write/stage_write";
+
     string cmds[] = [ht_path, sw_path];
 
     string args[][];
-    int htproc_x = 4;
-    int htproc_y = 3;
-    string rmethod = "DATASPACES";
-    args[0] = split("heat  %d %d 40 50  6 500 %s" % (htproc_x, htproc_y, result_file), " ");
+    string rmethod = "FLEXPATH";
+    args[0] = split("heat  %d %d 40 50 6 5 " % (ht_procs_x, ht_procs_y), " ");
     args[1] = split("heat.bp staged.bp %s \"\" MPI \"\"" % rmethod , " ");
-    printf("size: %i", size(args[1]));
 
     string envs[][];
 
-    envs[0] = [ "swift_chdir=/tmp"/run_id ];
-    envs[1] = [ "swift_chdir=/tmp"/run_id ];
+    envs[0] = [ "swift_chdir="+outdir ];
+    envs[1] = [ "swift_chdir="+outdir ];
 
     // Something like MPIX_Launch_Swift/apps/multi-1/workflow-1.swift
     printf("swift: multiple launching: %s, %s", cmds[0], cmds[1]);
-    exit_code = @par=sum_integer(procs) launch_multi(procs, cmds, args, envs);
+    setup_run(outdir) =>
+      exit_code = @par=sum_integer(procs) launch_multi(procs, cmds, args, envs);
     printf("swift: received exit code: %d", exit_code);
     if (exit_code != 0)
     {
@@ -80,18 +91,10 @@ string site = argv("site");
 
     wait(exit_code) {
       // eresult = get_results(result_file) ;
-      result = ht_procs + sw_procs;
+      result = int2string(ht_procs_x + sw_procs);
     }
 
     printf("result(%s): %s", run_id, result);
-}
-
-// Run a shell script
-app (void o) run_model (string params,
-        string run_id)
-{
-    //                    1         2
-    "bash" "fake-fob.sh" params run_id;
 }
 
 // Get the results from a NN run

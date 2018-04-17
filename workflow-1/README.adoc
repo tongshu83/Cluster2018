@@ -19,6 +19,8 @@ This workflow optimizes the parameters passed to the Heat Transfer example.
 .. Set the R location
 .. Set LD_LIBRARY_PATH for R and EVPath
 .. Set the MPI_Launch_Swift location (LAUNCH)
+. Edit workflow.swift:
+.. Set the ht_path and sw_path
 
 == Run
 
