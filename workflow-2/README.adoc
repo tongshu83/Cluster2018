@@ -1,0 +1,29 @@
+
+:toc:
+
+= Design Optimization
+Justin M. Wozniak <wozniak@mcs.anl.gov>
+
+== Overview
+
+This workflow optimizes the parameters passed to the Heat Transfer example.
+
+== Installation
+
+. Install ADIOS/FlexPath
+. Install Swift/T with R
+. Compile EQ/R (in the EQ-R directory)
+. Install MPI_Launch_Swift
+. Install mlrMBO (./install-mlrMBO.sh)
+. Edit workflow.sh:
+.. Set the R location
+.. Set LD_LIBRARY_PATH for R and EVPath
+.. Set the MPI_Launch_Swift location (LAUNCH)
+. Edit workflow.swift:
+.. Set the ht_path and sw_path
+
+== Run
+
+----
+$ ./workflow.sh
+----

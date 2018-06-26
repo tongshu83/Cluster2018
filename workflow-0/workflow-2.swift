@@ -14,9 +14,6 @@ import stats;
 import string;
 import sys;
 
-// import R;
-// import EQR;
-
 string emews_root = getenv("EMEWS_PROJECT_ROOT");
 string resident_work_ranks = getenv("RESIDENT_WORK_RANKS");
 string r_ranks[] = split(resident_work_ranks,",");
@@ -79,8 +76,8 @@ string site = argv("site");
     wait(exit_code) {
         result = get_results(result_files);
     }
+
     printf("result(%s): %s", run_id, result);
-    file out <outdir/"out.txt"> = write(result);
 }
 
 (string obj_result) get_results(string result_files[])
@@ -154,7 +151,7 @@ string site = argv("site");
         max = "NaN";
     }
 }
-/*
+
 (string param_array[]) get_param_array()
 {
     foreach ht_procs_x in [1:4]
@@ -174,30 +171,10 @@ main()
 {
     string param_array[] = get_param_array();
     string result[];
-    foreach p, i in param_array
+    foreach p, j in param_array
     {
         printf("p = %s", p);
-        result[i] = obj(p, "%000i" % i);
-    }
-    string results = join(result, ";");
-}
-*/
-
-main()
-{
-    string param_array[];
-    string result[];
-    foreach ht_procs_x in [1:4]
-    {
-        foreach ht_procs_y in [1:4]
-        {
-            foreach sw_procs in [1:16]
-            {
-                int i = (ht_procs_x - 1) * 4 * 16 + (ht_procs_y - 1) * 16 + sw_procs - 1;
-                param_array[i] = "{\"ht_procs_x\":%i,\"ht_procs_y\":%i,\"sw_procs\":%i}" % (ht_procs_x, ht_procs_y, sw_procs);
-                result[i] = obj(param_array[i], "%000i_%000i_%000i" % (ht_procs_x, ht_procs_y, sw_procs));
-            }
-        }
+        // result[j] = obj(p, "%000i_%0000i" % (i, j));
     }
     string results = join(result, ";");
 }
