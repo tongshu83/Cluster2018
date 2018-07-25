@@ -66,6 +66,7 @@ string site = argv("site");
     string envs[][];
     envs[0] = [ "swift_chdir="+outdir ];
     envs[1] = [ "swift_chdir="+outdir ];
+    printf("envs[0] = %s, envs[1] = %s", envs[0][0], envs[1][0]);
 
     printf("swift: multiple launching: %s, %s", cmds[0], cmds[1]);
     setup_run(outdir) =>

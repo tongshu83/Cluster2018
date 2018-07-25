@@ -20,10 +20,12 @@ export EMEWS_PROJECT_ROOT=$( cd $( dirname $0 ) ; /bin/pwd )
 # Set the output directory
 export TURBINE_OUTPUT=$EMEWS_PROJECT_ROOT/experiments/$EXPID
 mkdir -pv $TURBINE_OUTPUT
+cp heat_transfer.xml $TURBINE_OUTPUT/heat_transfer.xml
 
 # Total number of processes available to Swift/T
 # Of these, 2 are reserved for the system
-export PROCS=33
+export PROCS=48
+export PPN=16
 
 # EMEWS resident task workers and ranks
 export TURBINE_RESIDENT_WORK_WORKERS=1
@@ -50,13 +52,17 @@ EQR=$EQR_HOME
 #LAUNCH=$HOME/proj/mls/src
 
 # USER: set the R variable to your R installation
-R=$HOME/software/R-3.4.3/lib/R
-export LD_LIBRARY_PATH=$R/lib:$R/library/Rcpp/libs:$R/library/RInside/lib:$R/library/RInside/libs
+#R=$HOME/software/R-3.5.1/lib64/R
+R=/home/wozniak/Public/sfw/blues/R-3.4.3/lib64/R
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$R/lib:$R/library/Rcpp/libs:$R/library/RInside/lib:$R/library/RInside/libs
 #R=$HOME/Public/sfw/R-3.4.3/lib/R
 #export LD_LIBRARY_PATH=$R/lib:$R/library/Rcpp/lib:$R/library/RInside/lib:$HOME/sfw/evpath/lib
-MACHINE=""
-ENVS=""
+MACHINE="-m pbs"
 
+export X=3
+
+ENVS="-e LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/software/gcc-4.7.2/lib64 -e R_HOME=$R_HOME -e X"
+echo R_HOME $R_HOME
 set -x
 swift-t -l $MACHINE -p -n $PROCS \
     -I $EQR -r $EQR $ENVS \
