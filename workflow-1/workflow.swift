@@ -30,6 +30,8 @@ string exp_id = argv("exp_id");
 int benchmark_timeout = toint(argv("benchmark_timeout", "-1"));
 string obj_param = argv("obj_param", "val_loss");
 string site = argv("site");
+int ht_x = 160;
+int ht_y = 150;
 
 (void v) setup_run(string dir) "turbine" "0.0"
 [
@@ -60,13 +62,12 @@ string site = argv("site");
 
     string args[][];
     string rmethod = "FLEXPATH";
-    args[0] = split("heat  %d %d 40 50 6 5 " % (ht_procs_x, ht_procs_y), " ");
+    args[0] = split("heat %d %d %d %d 6 5 " % (ht_procs_x, ht_procs_y, ht_x %/ ht_procs_x, ht_y %/ ht_procs_y), " ");
     args[1] = split("heat.bp staged.bp %s \"\" MPI \"\"" % rmethod , " ");
 
     string envs[][];
     envs[0] = [ "swift_chdir="+outdir ];
     envs[1] = [ "swift_chdir="+outdir ];
-    printf("envs[0] = %s, envs[1] = %s", envs[0][0], envs[1][0]);
 
     printf("swift: multiple launching: %s, %s", cmds[0], cmds[1]);
     setup_run(outdir) =>
