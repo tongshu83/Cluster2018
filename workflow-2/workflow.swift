@@ -3,6 +3,8 @@
    WORKFLOW.SWIFT
  */
 
+trace("SWIFT RUNNING!");
+
 import files;
 import string;
 import sys;
@@ -249,6 +251,8 @@ param.set.file='%s',
 
 main() {
 
+
+       printf("turbine workers: %i", turbine_workers());
     assert(strlen(emews_root) > 0, "Set EMEWS_PROJECT_ROOT!");
 
     int ME_ranks[];
