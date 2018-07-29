@@ -56,13 +56,16 @@ int ht_y = 150;
     sw_procs   = string2int(json_get(params, "sw_procs"));
     int procs[] = [ ht_procs_x * ht_procs_y, sw_procs ];
 
-    string ht_path = "/home/tshu/project/Example-Heat_Transfer/heat_transfer_adios2.sh";
-    string sw_path = "/home/tshu/project/Example-Heat_Transfer/stage_write.sh";
+    // string ht_path = "/blues/gpfs/home/tshu/project/Example-Heat_Transfer/heat_transfer_adios2.sh";
+    // string sw_path = "/blues/gpfs/home/tshu/project/Example-Heat_Transfer/stage_write.sh";
+    string ht_path = "/blues/gpfs/home/tshu/project/Example-Heat_Transfer/heat_transfer_adios2";
+    string sw_path = "/blues/gpfs/home/tshu/project/Example-Heat_Transfer/stage_write/stage_write";
     string cmds[] = [ht_path, sw_path];
 
     string args[][];
     string rmethod = "FLEXPATH";
-    args[0] = split("heat %d %d %d %d 6 5 " % (ht_procs_x, ht_procs_y, ht_x %/ ht_procs_x, ht_y %/ ht_procs_y), " ");
+    // args[0] = split("heat %i %i 40 50 6 5 " % (ht_procs_x, ht_procs_y), " ");
+    args[0] = split("heat %i %i %i %i 6 5 " % (ht_procs_x, ht_procs_y, ht_x %/ ht_procs_x, ht_y %/ ht_procs_y), " ");
     args[1] = split("heat.bp staged.bp %s \"\" MPI \"\"" % rmethod , " ");
 
     string envs[][];
@@ -72,14 +75,15 @@ int ht_y = 150;
     printf("swift: multiple launching: %s, %s", cmds[0], cmds[1]);
     setup_run(outdir) =>
         exit_code = @par=sum_integer(procs) launch_multi(procs, cmds, args, envs);
-    printf("swift: received exit code: %d", exit_code);
+    printf("swift: received exit code: %i (%i, %i, %i)", exit_code, ht_procs_x, ht_procs_y, sw_procs);
     if (exit_code != 0)
     {
         printf("swift: The multi-launched applications did not succeed.");
     }
 
     wait(exit_code) {
-        result = get_results(result_files);
+	result = "0.0";
+        // result = get_results(result_files);
     }
     printf("result(%s): %s", run_id, result);
     file out <outdir/"out.txt"> = write(result);
@@ -189,11 +193,16 @@ main()
 {
     string param_array[];
     string result[];
-    foreach ht_procs_x in [1:4]
+    param_array[0] = "{\"ht_procs_x\":%i,\"ht_procs_y\":%i,\"sw_procs\":%i}" % (4, 3, 3);
+    param_array[1] = "{\"ht_procs_x\":%i,\"ht_procs_y\":%i,\"sw_procs\":%i}" % (4, 2, 3);
+    result[0] = obj(param_array[0], "%000i_%000i_%000i" % (4, 3, 3)) =>
+    result[1] = obj(param_array[1], "%000i_%000i_%000i" % (4, 2, 3));
+/*
+    foreach ht_procs_x in [1 : 4]
     {
-        foreach ht_procs_y in [1:4]
+        foreach ht_procs_y in [1 : 4]
         {
-            foreach sw_procs in [1:16]
+            foreach sw_procs in [1 : 16]
             {
                 int i = (ht_procs_x - 1) * 4 * 16 + (ht_procs_y - 1) * 16 + sw_procs - 1;
                 param_array[i] = "{\"ht_procs_x\":%i,\"ht_procs_y\":%i,\"sw_procs\":%i}" % (ht_procs_x, ht_procs_y, sw_procs);
@@ -201,6 +210,7 @@ main()
             }
         }
     }
+*/
     string results = join(result, ";");
 }
 

@@ -27,7 +27,7 @@ cp heat_transfer.xml $TURBINE_OUTPUT/heat_transfer.xml
 export PROCS=48
 export PPN=16
 
-export WALLTIME=12:00:00
+export WALLTIME=00:03:00
 
 # EMEWS resident task workers and ranks
 export TURBINE_RESIDENT_WORK_WORKERS=1
